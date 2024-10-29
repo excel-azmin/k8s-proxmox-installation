@@ -72,16 +72,18 @@ metadata:
 *  Create Ingress
 
   ```
-  apiVersion: networking.k8s.io/v1
+# nginx-ingress.yaml
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx-ingress
-  namespace: default
+  namespace: default  # Set the namespace
   annotations:
-    kubernetes.io/ingress.class: "nginx"  # Specify the Ingress class
+    kubernetes.io/ingress.class: "nginx"  # Define the Ingress class
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host: test.local.com
+  - host: test.local.com  # Ensure this matches your DNS or IP
     http:
       paths:
       - path: /
@@ -91,6 +93,7 @@ spec:
             name: nginx-service
             port:
               number: 80
+
 ```
 
 *  Set Up TLS/SSL with Cert-Manager (For HTTPS)
@@ -119,21 +122,22 @@ spec:
 *  Update the Ingress to use TLS
 
 ```
-# nginx-ingress-tls.yaml
+# nginx-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx-ingress
+  namespace: default  # Set the namespace
   annotations:
+    kubernetes.io/ingress.class: "nginx"  # Define the Ingress class
     nginx.ingress.kubernetes.io/rewrite-target: /
-    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   tls:
   - hosts:
-    - testapp.example.com
-    secretName: nginx-cert # Cert-manager will create this secret
+    - test.local.com  # Host for which the TLS certificate is issued
+    secretName: test-local-com-tls  # Secret where the TLS cert is stored
   rules:
-  - host: testapp.example.com
+  - host: test.local.com  # Ensure this matches your DNS or IP
     http:
       paths:
       - path: /
@@ -143,4 +147,5 @@ spec:
             name: nginx-service
             port:
               number: 80
+
 ```
